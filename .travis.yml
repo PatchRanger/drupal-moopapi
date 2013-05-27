@@ -33,7 +33,7 @@ before_script:
  # Get Patchwork library.
  - wget --output-document=patchwork.zip https://github.com/antecedent/patchwork/archive/master.zip
  - ls -la
- - unzip patchwork.zip patchwork
+ - unzip patchwork.zip
  - ls -la
  - cp -R patchwork sites/all/libraries
  - cp -R ../$GITHUB_REPOSITORY sites/all/modules/$DRUPAL_MODULE
