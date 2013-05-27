@@ -4,10 +4,6 @@
  * Tests for Moopapi module.
  */
 
-function doesMonkeyPatchWork() {
-  return FALSE;
-}
-
 /**
  * Tests basic Libraries API functions.
  */
@@ -44,6 +40,9 @@ class MoopapiMonkeyPatchUnitTestCase extends DrupalUnitTestCase {
   }
 
   public function testMonkeyPatch() {
+    function doesMonkeyPatchWork() {
+      return FALSE;
+    }
     Patchwork\replace("doesMonkeyPatchWork", function()
     {
         return TRUE;
