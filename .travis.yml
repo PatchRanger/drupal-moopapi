@@ -27,6 +27,15 @@ before_script:
  # Install Drupal.
  - drush si standard --db-url=mysql://root:@localhost/drupal --yes
  - drush en simpletest --yes
+ # Enable Libraries.
+ - drush dl libraries --dev --no-cache
+ - drush en libraries
+ # Get Patchwork library.
+ - wget --output-document=patchwork.zip https://github.com/antecedent/patchwork/archive/master.zip
+ - ls -la
+ - unzip patchwork.zip patchwork
+ - ls -la
+ - cp -R patchwork sites/all/libraries
  - cp -R ../$GITHUB_REPOSITORY sites/all/modules/$DRUPAL_MODULE
  - drush en $DRUPAL_MODULE --yes
  # To make test file discoverable.
