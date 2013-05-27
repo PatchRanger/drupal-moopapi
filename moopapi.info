@@ -7,7 +7,9 @@ dependencies[] = libraries
 
 ;files[] = moopapi.install
 files[] = moopapi.module
-files[] = moopapi.test
+files[] = tests/moopapi.test
+; It must be excluded before Patchwork library is loaded.
+;files[] = tests/monkey_patch.inc
 files[] = core/drupal/drupal.application.controller.inc
 files[] = core/file/file.application.controller.inc
 files[] = component/moopapi.component.inc

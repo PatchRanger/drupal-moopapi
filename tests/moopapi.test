@@ -40,9 +40,9 @@ class MoopapiMonkeyPatchUnitTestCase extends DrupalUnitTestCase {
   }
 
   public function testMonkeyPatch() {
-    function doesMonkeyPatchWork() {
-      return FALSE;
-    }
+    // Only now we include necessary file to make Patchwork
+    // interception work.
+    module_load_include('inc', 'moopapi', 'tests/monkey_patch');
     Patchwork\replace("doesMonkeyPatchWork", function()
     {
         return TRUE;
