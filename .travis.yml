@@ -54,7 +54,7 @@ before_script:
  #- drush vset simpletest_verbose FALSE --yes
  - drush vset simpletest_verbose TRUE --yes
 
-script: php scripts/run-tests.sh --php ~/.phpenv/versions/5.4.13/bin/php --url 'http://127.0.0.1:8080' --verbose --file sites/all/modules/$DRUPAL_MODULE/$DRUPAL_MODULE.test
+script: php scripts/run-tests.sh --php ~/.phpenv/versions/5.4.13/bin/php --url 'http://127.0.0.1:8080' --verbose --file sites/all/modules/$DRUPAL_MODULE/tests/$DRUPAL_MODULE.test
  #drush test-run --xml --file=sites/all/modules/moopapi/core/simpletest.test --uri=http://127.0.0.1:8080
 
 after_script:
