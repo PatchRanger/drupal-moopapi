@@ -13,10 +13,13 @@ before_script:
  - pyrus install drush/drush-devel
  - phpenv rehash
  - cd ..
- - ls -la
  # --no-cache is must-have due to http://drupal.org/node/1630220
  - drush dl drupal-7 --dev --no-cache
+ # Discover newly downloaded directory.
+ - ls -la
  - cd drupal-*
+ # make sure we are inside Drupal root.
+ - ls -la
  - drush en simpletest --yes
  - drush en moopapi --yes
  # To make test file discoverable.
