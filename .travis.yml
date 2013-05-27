@@ -37,7 +37,7 @@ before_script:
  # Enable Libraries.
  - drush dl libraries --dev --no-cache
  - drush en libraries --yes
- - cp -R ../patchwork sites/all/libraries
+ - cp -R ../patchwork sites/all/libraries/patchwork
  - ls sites/all/libraries/patchwork -la
  - cp -R ../$GITHUB_REPOSITORY sites/all/modules/$DRUPAL_MODULE
  - drush en $DRUPAL_MODULE --yes
