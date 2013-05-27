@@ -13,4 +13,15 @@ function moopapi_enable() {
     ->condition('type', 'module')
     ->condition('name', 'moopapi')
     ->execute();
+  // @todo Refactor it.
+  $modules = array(
+    'drupal',
+    'file',
+  );
+  foreach ($modules as $module) {
+    variable_set("{$module}_decorators", serialize(array('D6Adapter')));
+  }
+  // Turning on the magic.
+  moopapi_boot();
+  moopapi_init();
 }

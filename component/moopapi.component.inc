@@ -88,9 +88,10 @@ abstract class ComponentFactory {
       $path = "./" . drupal_get_path('module', $module) . "/$file.inc";
       if (file_exists($path)) {
         module_load_include('inc', $module, $file);
-        $decorator_class = $class . $decorator;
-        $component = new $decorator_class($decorators_applied, $relations, $component);
       }
+      // If there is no such file, we assume that it was included somewhere else.
+      $decorator_class = $class . $decorator;
+      $component = new $decorator_class($decorators_applied, $relations, $component);
       unset($decorators_applied[$did]);
     }
     return $component;
