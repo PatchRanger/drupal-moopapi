@@ -5,13 +5,14 @@
  */
 
 /**
- * Tests basic Libraries API functions.
+ * Tests that Patchwork library is available, installed and
+ * works properly and tests Moopapi interface.
  */
-class MoopapiMonkeyPatchUnitTestCase extends DrupalUnitTestCase {
+class MoopapiUnitTestCase extends DrupalUnitTestCase {
   public static function getInfo() {
     return array(
-      'name' => 'Moopapi monkey patch unit tests',
-      'description' => 'Tests that patchwork library is available and works.',
+      'name' => 'Moopapi unit tests',
+      'description' => 'Tests that Patchwork library is available, installed and works properly and tests Moopapi interface.',
       'group' => 'Moopapi',
     );
   }
@@ -49,4 +50,61 @@ class MoopapiMonkeyPatchUnitTestCase extends DrupalUnitTestCase {
     });
     $this->assertTrue(doesMonkeyPatchWork(), 'Monkey patching works');
   }
+
+  public function testRegister() {
+    $use_cases = array(
+      'both_filled',
+      'app_null',
+      'class_null',
+      'both_null',
+    );
+    foreach ($use_cases as $use_case) {
+      switch ($use_case) {
+        case 'app_null':
+          $app = NULL;
+          $class = 'ExampleClass';
+          break;
+        case 'class_null':
+          $app = 'ExampleApp';
+          $class = NULL;
+          break;
+        case 'both_null':
+          $app = NULL;
+          $class = NULL;
+          break;
+        case 'uppercase':
+          $app = 'EXAMPLEAPP';
+          $class = 'EXAMPLECLASS';
+          break;
+        case 'lowercase':
+          $app = 'exampleapp';
+          $class = 'exampleclass';
+          break;
+        case 'camelcase':
+          $app = 'ExampleApp';
+          $class = 'ExampleClass';
+          break;
+      }
+      // Test interface function.
+      $result = moopapi_register($app, $class);
+      // Check result.
+      if ($use_case !== 'app_null' && $use_case !== 'both_null') {
+        $app_capitalized_first = ucfirst(strtolower($app));
+        $this->assertTrue(!empty($result[$app_capitalized_first]) && is_object($result[$app_capitalized_first]), "$use_case: Application is registered");
+        $class = !empty($class) ? $class : $app;
+        $this->assertEqual(is_a($result[$app_capitalized_first], $class), "$use_case: Application is decorated");
+      }
+      else {
+        $this->assertTrue(empty($result), "$use_case: Result should be empty");
+      }
+      // Clear the workspace.
+      unset($result);
+    }
+  }
 }
+
+/**
+ * It is for testing Moopapi::register().
+ */
+class ExampleApp {}
+class ExampleClass {}
