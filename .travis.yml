@@ -29,7 +29,7 @@ before_script:
  - drush en simpletest --yes
  # Enable Libraries.
  - drush dl libraries --dev --no-cache
- - drush en libraries
+ - drush en libraries --yes
  # Get Patchwork library.
  - wget --output-document=patchwork.zip https://github.com/antecedent/patchwork/archive/master.zip
  - ls -la
