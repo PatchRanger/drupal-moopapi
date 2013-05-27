@@ -1,0 +1,30 @@
+<?php
+
+/*
+ * Tests for Moopapi module.
+ */
+
+function doesMonkeyPatchWork() {
+  return FALSE;
+}
+
+/**
+ * Tests basic Libraries API functions.
+ */
+class MoopapiMonkeyPatchUnitTestCase extends DrupalUnitTestCase {
+  public static function getInfo() {
+    return array(
+      'name' => 'Moopapi monkey patch unit tests',
+      'description' => 'Tests that patchwork library is available and works.',
+      'group' => 'Moopapi',
+    );
+  }
+
+  public function testMonkeyPatch() {
+    Patchwork\replace("doesMonkeyPatchWork", function()
+    {
+        return TRUE;
+    });
+    $this->assertTrue(doesMonkeyPatchWork(), 'Monkey patching works');
+  }
+}

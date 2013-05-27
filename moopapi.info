@@ -6,7 +6,8 @@ core = 7.x
 dependencies[] = libraries
 
 ;files[] = moopapi.install
-;files[] = moopapi.module
+files[] = moopapi.module
+files[] = moopapi.test
 files[] = core/drupal/drupal.application.controller.inc
 files[] = core/file/file.application.controller.inc
 files[] = component/moopapi.component.inc
