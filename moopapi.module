@@ -30,6 +30,28 @@ function moopapi_init() {
 }
 
 /**
+ * Implements hook_libraries_info().
+ *
+ * @return
+ *   An associative array whose keys are internal names of libraries and whose
+ *   values are describing each library. Each key is the directory name below
+ *   the 'libraries' directory, in which the library may be found.
+ */
+function moopapi_libraries_info() {
+  $libraries['patchwork'] = array(
+    'name' => 'Patchwork library',
+    'vendor url' => 'http://antecedent.github.com/patchwork',
+    'download url' => 'https://github.com/antecedent/patchwork',
+    'version arguments' => array(
+      'file' => 'README.md',
+      'pattern' => '@Version ([0-9\.]+)@',
+      'lines' => 5,
+    ),
+  );
+  return $libraries;
+}
+
+/**
  * Api function that will create function wrapper to a class method
  *
  * @param stdClass $class

@@ -20,6 +20,27 @@ class MoopapiMonkeyPatchUnitTestCase extends DrupalUnitTestCase {
     );
   }
 
+  public function setUp() {
+    parent::setUp(array('moopapi'));
+    $library = libraries_detect('patchwork');
+    // Check Patchwork library.
+    if ($this->assertTrue($library, 'Patchwork library is detected')) {
+      if (is_array($library) && !empty($library['installed'])) {
+        $this->pass('Patchwork library is installed');
+      }
+      else {
+        $message = 'Error while installing Patchwork library';
+        if (!empty($library['error'])) {
+          $message = 'Library Patchwork is ' . $library['error'];
+        }
+        if (!empty($library['error message'])) {
+          $message .= ': ' . $library['error message'];
+        }
+        $this->fail($message);
+      }
+    }
+  }
+
   public function testMonkeyPatch() {
     Patchwork\replace("doesMonkeyPatchWork", function()
     {
