@@ -1,0 +1,11 @@
+name = Module Object Oriented Programming API
+description = Makes pure OOP syntax modules possible within the Drupal framework
+version = 1.x
+core = 7.x
+
+files[] = moopapi.install
+files[] = moopapi.module
+files[] = component/moopapi.component.inc
+files[] = component/decorator/adapter/moopapi.adapter.inc
+files[] = component/decorator/adapter/core/file/file.d6adapter.inc
+files[] = component/decorator/logger/moopapi.logger.inc
