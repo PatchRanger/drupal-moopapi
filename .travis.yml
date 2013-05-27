@@ -23,6 +23,7 @@ before_script:
  # Install Drupal.
  - drush si standard --db-url=mysql://root:@localhost/drupal --yes
  - drush en simpletest --yes
+ - cp -R ../drupal7-moopapi sites/all/modules/moopapi
  - drush en moopapi --yes
  # To make test file discoverable.
  #- ls -la
