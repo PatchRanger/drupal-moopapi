@@ -17,6 +17,13 @@ before_script:
  - pyrus install drush/drush-devel
  - phpenv rehash
  - cd ..
+ # Get Patchwork library.
+ - wget --output-document=patchwork.zip https://github.com/antecedent/patchwork/archive/master.zip
+ - ls -la
+ - unzip patchwork.zip
+ - ls -la
+ - mv patchwork-master patchwork
+ - ls patchwork -la
  # --no-cache is must-have due to http://drupal.org/node/1630220
  - drush dl drupal-$DRUPAL_VERSION --no-cache
  # Discover newly downloaded directory.
@@ -30,12 +37,8 @@ before_script:
  # Enable Libraries.
  - drush dl libraries --dev --no-cache
  - drush en libraries --yes
- # Get Patchwork library.
- - wget --output-document=patchwork.zip https://github.com/antecedent/patchwork/archive/master.zip
- - ls -la
- - unzip patchwork.zip
- - ls -la
- - cp -R patchwork sites/all/libraries
+ - cp -R ../patchwork sites/all/libraries
+ - ls sites/all/libraries/patchwork -la
  - cp -R ../$GITHUB_REPOSITORY sites/all/modules/$DRUPAL_MODULE
  - drush en $DRUPAL_MODULE --yes
  # To make test file discoverable.
