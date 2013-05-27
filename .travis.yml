@@ -1,0 +1,38 @@
+language: php
+php:
+  - 5.4
+
+mysql:
+  database: drupal
+  username: root
+  encoding: utf8
+
+before_script:
+ - mysql -e 'create database drupal;'
+ - pyrus channel-discover pear.drush.org
+ - pyrus install drush/drush-devel
+ - phpenv rehash
+ - cd ..
+ - ls -la
+ # --no-cache is must-have due to http://drupal.org/node/1630220
+ - drush dl drupal-7 --dev --no-cache
+ - cd drupal-*
+ - drush en simpletest --yes
+ - drush en moopapi --yes
+ # To make test file discoverable.
+ #- ls -la
+ # Up to Drupal root level.
+ #- cd ../../../../../
+ # DEBUG
+ #- ls -la
+ - drush cc all
+ - drush runserver --server=builtin 8080 &
+ - sleep 4
+ #- drush vset simpletest_verbose FALSE --yes
+ - drush vset simpletest_verbose TRUE --yes
+
+script: php scripts/run-tests.sh --php ~/.phpenv/versions/5.4.13/bin/php --url 'http://127.0.0.1:8080' --verbose --file sites/all/modules/moopapi/moopapi.test
+ #drush test-run --xml --file=sites/all/modules/moopapi/core/simpletest.test --uri=http://127.0.0.1:8080
+
+after_script:
+ #- ls sites/default/files -la
