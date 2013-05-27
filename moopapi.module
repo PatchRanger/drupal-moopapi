@@ -47,6 +47,11 @@ function moopapi_libraries_info() {
       'pattern' => '@Version ([0-9\.]+)@',
       'lines' => 5,
     ),
+    'files' => array(
+      'php' => array(
+        'Patchwork.php',
+      ),
+    ),
   );
   return $libraries;
 }
