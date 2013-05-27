@@ -20,6 +20,8 @@ before_script:
  - cd drupal-*
  # make sure we are inside Drupal root.
  - ls -la
+ # Install Drupal.
+ - drush si standard --db-url=mysql://root:@localhost/drupal --yes
  - drush en simpletest --yes
  - drush en moopapi --yes
  # To make test file discoverable.
