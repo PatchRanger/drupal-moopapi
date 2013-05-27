@@ -27,6 +27,8 @@ class MoopapiMonkeyPatchUnitTestCase extends DrupalUnitTestCase {
     if ($this->assertTrue($library, 'Patchwork library is detected')) {
       if (is_array($library) && !empty($library['installed'])) {
         $this->pass('Patchwork library is installed');
+        $library = libraries_load('patchwork');
+        $this->assertTrue(!empty($library['loaded']), 'Patchwork library is loaded');
       }
       else {
         $message = 'Error while installing Patchwork library';
