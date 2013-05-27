@@ -18,7 +18,7 @@ before_script:
  - phpenv rehash
  - cd ..
  # --no-cache is must-have due to http://drupal.org/node/1630220
- - drush dl drupal-DRUPAL_VERSION --no-cache
+ - drush dl drupal-$DRUPAL_VERSION --no-cache
  # Discover newly downloaded directory.
  - ls -la
  - cd drupal-*
@@ -27,8 +27,8 @@ before_script:
  # Install Drupal.
  - drush si standard --db-url=mysql://root:@localhost/drupal --yes
  - drush en simpletest --yes
- - cp -R ../GITHUB_REPOSITORY sites/all/modules/DRUPAL_MODULE
- - drush en DRUPAL_MODULE --yes
+ - cp -R ../$GITHUB_REPOSITORY sites/all/modules/$DRUPAL_MODULE
+ - drush en $DRUPAL_MODULE --yes
  # To make test file discoverable.
  #- ls -la
  # Up to Drupal root level.
@@ -41,7 +41,7 @@ before_script:
  #- drush vset simpletest_verbose FALSE --yes
  - drush vset simpletest_verbose TRUE --yes
 
-script: php scripts/run-tests.sh --php ~/.phpenv/versions/5.4.13/bin/php --url 'http://127.0.0.1:8080' --verbose --file sites/all/modules/DRUPAL_MODULE/DRUPAL_MODULE.test
+script: php scripts/run-tests.sh --php ~/.phpenv/versions/5.4.13/bin/php --url 'http://127.0.0.1:8080' --verbose --file sites/all/modules/$DRUPAL_MODULE/$DRUPAL_MODULE.test
  #drush test-run --xml --file=sites/all/modules/moopapi/core/simpletest.test --uri=http://127.0.0.1:8080
 
 after_script:
