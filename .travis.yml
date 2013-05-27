@@ -9,7 +9,7 @@ mysql:
 
 # This is for make code abstract, facilitating copy-pasting.
 env:
-  GITHUB_REPOSITORY=drupal7-moopapi DRUPAL_VERSION=7-x DRUPAL_MODULE=moopapi
+  GITHUB_REPOSITORY=drupal7-moopapi DRUPAL_VERSION=7.x DRUPAL_MODULE=moopapi
 
 before_script:
  - mysql -e 'create database drupal;'
