@@ -3,6 +3,8 @@ description = Makes pure OOP syntax modules possible within the Drupal framework
 version = 1.x
 core = 7.x
 
+dependencies[] = libraries
+
 ;files[] = moopapi.install
 ;files[] = moopapi.module
 files[] = core/drupal/drupal.application.controller.inc
