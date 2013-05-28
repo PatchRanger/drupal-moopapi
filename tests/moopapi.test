@@ -92,12 +92,13 @@ class MoopapiUnitTestCase extends DrupalUnitTestCase {
       // Check result.
       if ($use_case !== 'app_null' && $use_case !== 'both_null') {
         $app_capitalized_first = ucfirst(strtolower($app));
-        $this->assertTrue(!empty($result[$app_capitalized_first]) && is_object($result[$app_capitalized_first]), "$use_case: Application is registered");
+        $this->assertTrue(!empty($result[$app_capitalized_first]), "$use_case: Application is registered");
         $class = !empty($class) ? $class : $app;
-        $this->assertEqual(is_a($result[$app_capitalized_first], $class), "$use_case: Application is decorated");
+        $this->assertEqual($result[$app_capitalized_first], ucfirst($class), "$use_case: Application is decorated");
       }
       else {
-        $this->assertTrue(empty($result), "$use_case: Result should be empty");
+        $result_string = print_r($result, TRUE);
+        $this->assertTrue(empty($result), "$use_case: Result $result_string should be empty");
       }
       // Clear the workspace.
       static $classes;
