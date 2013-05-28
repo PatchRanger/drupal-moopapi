@@ -91,7 +91,6 @@ function moopapi_wrap($app, $method, array $decorators = array()) {
   $ref_method = new ReflectionMethod($app, $method);
   $parameters = $ref_method->getParameters();
   $args = moopapi_create_args($parameters);
-  $decorators_string = print_r($decorators, TRUE);
   $function = <<<END
 function {$app}_{$method}({$args}) {
   // To pass additional params that are not declared.
@@ -105,7 +104,7 @@ function {$app}_{$method}({$args}) {
       \$full_args[\$number] = &\$\$var_name;
     }
   }
-  \$application = moopapi_object('{$app}', {$decorators_string});
+  \$application = moopapi_object('{$app}', {$decorators});
   return call_user_func_array(array(\$application, '{$method}'), \$full_args);
 }
 END;
