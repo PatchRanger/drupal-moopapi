@@ -10,8 +10,8 @@ function moopapi_boot() {
    *
    * @todo Refactor it.
    */
-  module_invoke('moopapi', 'register', 'drupal', 'D6Adapter');
-  module_invoke('moopapi', 'register', 'file', 'D6Adapter');
+  module_invoke('moopapi', 'register', 'drupal', array('D6Adapter'));
+  module_invoke('moopapi', 'register', 'file', array('D6Adapter'));
 }
 
 /**
