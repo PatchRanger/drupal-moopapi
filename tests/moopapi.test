@@ -159,7 +159,8 @@ class MoopapiUnitTestCase extends DrupalUnitTestCase {
       if ($use_case === 'class_null') {
         $class = $app;
       }
-      $this->assertTrue(is_a($result, $class), "$use_case: Returned Application is of correct class");
+      $class_real = get_class($result);
+      $this->assertEqual($class_real, $class, "$use_case: Returned Application class $class_real equals correct class $class");
       // Clear workspace.
       unset($result);
     }
