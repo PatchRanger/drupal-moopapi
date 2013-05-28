@@ -88,6 +88,8 @@ class MoopapiUnitTestCase extends DrupalUnitTestCase {
           break;
       }
       // Test interface function.
+      static $classes;
+      $classes_old = $classes;
       $result = moopapi_register($app, $class);
       // Check result.
       if ($use_case !== 'app_null' && $use_case !== 'both_null') {
@@ -97,11 +99,10 @@ class MoopapiUnitTestCase extends DrupalUnitTestCase {
         $this->assertEqual($result[$app_capitalized_first], ucfirst($class), "$use_case: Application is decorated");
       }
       else {
-        $result_string = print_r($result, TRUE);
-        $this->assertTrue(empty($result), "$use_case: Result $result_string should be empty");
+        $this->assertEqual($classes_old, $classes, "$use_case: Register shouldn't change");
       }
       // Clear the workspace.
-      static $classes;
+      unset($result);
       $classes = array();
     }
   }
