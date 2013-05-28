@@ -24,7 +24,7 @@ function moopapi_init() {
     $methods = get_class_methods($class);
     // Casting to array is a protection from disabling dependent module.
     foreach ((array)$methods as $method) {
-      moopapi_create_wrapper($app, $method, $class);
+      moopapi_wrap($app, $method, $class);
     }
   }
 }
@@ -62,7 +62,7 @@ function moopapi_libraries_info() {
  * @param stdClass $class
  * @param method $method
  */
-function moopapi_create_wrapper($app, $method, $class = NULL) {
+function moopapi_wrap($app, $method, $class = NULL) {
   $class = ($class) ? $class : $app;
   if (in_array($method, moopapi_hook_ignore_list())) {
     /**

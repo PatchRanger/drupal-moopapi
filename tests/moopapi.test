@@ -53,15 +53,29 @@ class MoopapiUnitTestCase extends DrupalUnitTestCase {
 
   public function testRegister() {
     $use_cases = array(
+      'lowercase',
+      'uppercase',
+      'camelcase',
       'app_null',
       'class_null',
       'both_null',
-      'uppercase',
-      'lowercase',
-      'camelcase',
     );
     foreach ($use_cases as $use_case) {
       switch ($use_case) {
+        // Formatting.
+        case 'lowercase':
+          $app = 'exampleapp';
+          $class = 'exampleclass';
+          break;
+        case 'uppercase':
+          $app = 'EXAMPLEAPP';
+          $class = 'EXAMPLECLASS';
+          break;
+        case 'camelcase':
+          $app = 'ExampleApp';
+          $class = 'ExampleClass';
+          break;
+        // Business logic.
         case 'app_null':
           $app = NULL;
           $class = 'ExampleClass';
@@ -74,42 +88,86 @@ class MoopapiUnitTestCase extends DrupalUnitTestCase {
           $app = NULL;
           $class = NULL;
           break;
-        case 'uppercase':
-          $app = 'EXAMPLEAPP';
-          $class = 'EXAMPLECLASS';
-          break;
-        case 'lowercase':
-          $app = 'exampleapp';
-          $class = 'exampleclass';
-          break;
-        case 'camelcase':
-          $app = 'ExampleApp';
-          $class = 'ExampleClass';
-          break;
       }
       // Test interface function.
       static $classes;
       $classes_old = $classes;
       $result = moopapi_register($app, $class);
       // Check result.
-      if ($use_case !== 'app_null' && $use_case !== 'both_null') {
+      if (in_array($use_case, array('lowercase', 'uppercase', 'camelcase', 'class_null'))) {
+        // For formatting and class_null use cases.
         $app_capitalized_first = ucfirst(strtolower($app));
         $this->assertTrue(!empty($result[$app_capitalized_first]), "$use_case: Application is registered");
         $class = !empty($class) ? $class : $app;
         $this->assertEqual($result[$app_capitalized_first], ucfirst($class), "$use_case: Application is decorated");
       }
       else {
+        // Business logic use cases except class_null.
         $this->assertEqual($classes_old, $classes, "$use_case: Register shouldn't change");
       }
-      // Clear the workspace.
+      // Clear workspace.
       unset($result);
       $classes = array();
+    }
+  }
+
+  public function testWrap() {
+    $use_cases = array(
+      'lowercase',
+      'uppercase',
+      'camelcase',
+      'class_null',
+      'app_absent',
+      'class_absent',
+      'method_absent',
+    );
+    foreach ($use_cases as $use_case) {
+      switch ($use_case) {
+        case 'lowercase':
+          $app = 'exampleapp';
+          $method = 'examplemethod';
+          $class = 'exampleclass';
+          break;
+        case 'uppercase':
+          $app = 'EXAMPLEAPP';
+          $method = 'EXAMPLEMETHOD';
+          $class = 'EXAMPLECLASS';
+          break;
+        case 'camelcase':
+          $app = 'ExampleApp';
+          $method = 'ExampleMethod';
+          $class = 'ExampleClass';
+          break;
+        case 'class_null':
+          $app = 'ExampleApp';
+          $method = 'exampleMethod';
+          $class = NULL;
+          break;
+        case 'app_absent':
+          // @todo Moopapi::absent(): Implement app_absent use case.
+          break;
+        case 'class_absent':
+          // @todo Moopapi::absent(): Implement class_absent use case.
+          break;
+        case 'method_absent':
+          // @todo Moopapi::absent(): Implement method_absent use case.
+          break;
+      }
+      // Test interface function.
+      $result = moopapi_wrap($app, $method, $class);
+      // Check result.
+      if ($use_case === 'class_null') {
+        $class = $app;
+      }
+      $this->assertTrue(is_a($result, $class), "$use_case: Returned Application is of correct class");
+      // Clear workspace.
+      unset($result);
     }
   }
 }
 
 /**
- * It is for testing Moopapi::register().
+ * It is for testing Moopapi::wrap().
  */
 class ExampleApp {}
 class ExampleClass {}
