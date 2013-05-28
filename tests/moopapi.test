@@ -161,7 +161,8 @@ class MoopapiUnitTestCase extends DrupalUnitTestCase {
       }
       $function_name = "{$app}_{$method}";
       $this->assertTrue(function_exists($function_name), "$use_case: $function_name function was created");
-      $this->assertEqual(call_user_func($function_name), $class, "$use_case: Application $app wrapped into class $class");
+      $function_result = call_user_func($function_name);
+      $this->assertTrue(strcasecmp($function_result, $class), "$use_case: Calling $app::$method wrapped as $function_name brings $function_result, which is the same as $class");
       // Clear workspace.
       unset($result);
     }
