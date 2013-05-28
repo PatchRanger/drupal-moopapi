@@ -169,5 +169,10 @@ class MoopapiUnitTestCase extends DrupalUnitTestCase {
 /**
  * It is for testing Moopapi::wrap().
  */
-class ExampleApp {}
-class ExampleClass {}
+class ExampleApp {
+  public function exampleMethod() {}
+}
+
+class ExampleClass {
+  public function exampleMethod() {}
+}
