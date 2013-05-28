@@ -53,10 +53,12 @@ class MoopapiUnitTestCase extends DrupalUnitTestCase {
 
   public function testRegister() {
     $use_cases = array(
-      'both_filled',
       'app_null',
       'class_null',
       'both_null',
+      'uppercase',
+      'lowercase',
+      'camelcase',
     );
     foreach ($use_cases as $use_case) {
       switch ($use_case) {
