@@ -100,7 +100,8 @@ class MoopapiUnitTestCase extends DrupalUnitTestCase {
         $this->assertTrue(empty($result), "$use_case: Result should be empty");
       }
       // Clear the workspace.
-      unset($result);
+      static $classes;
+      $classes = array();
     }
   }
 }
