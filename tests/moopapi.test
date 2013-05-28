@@ -159,7 +159,7 @@ class MoopapiUnitTestCase extends DrupalUnitTestCase {
       if ($use_case === 'class_null') {
         $class = $app;
       }
-      $class_real = get_class($result);
+      $class_real = $result;
       $this->assertEqual($class_real, $class, "$use_case: Returned Application class $class_real equals correct class $class");
       // Clear workspace.
       unset($result);
@@ -171,9 +171,13 @@ class MoopapiUnitTestCase extends DrupalUnitTestCase {
  * It is for testing Moopapi::wrap().
  */
 class ExampleApp {
-  public function exampleMethod() {}
+  public function exampleMethod() {
+    return 'ExampleApp';
+  }
 }
 
 class ExampleClass {
-  public function exampleMethod() {}
+  public function exampleMethod() {
+    return 'ExampleClass';
+  }
 }
