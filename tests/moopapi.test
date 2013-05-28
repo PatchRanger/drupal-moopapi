@@ -1,6 +1,6 @@
 <?php
 
-/*
+/**
  * Tests for Moopapi module.
  */
 
@@ -57,7 +57,7 @@ class MoopapiUnitTestCase extends DrupalUnitTestCase {
       'uppercase',
       'camelcase',
       'app_null',
-      'class_null',
+      'decorators_null',
       'both_null',
     );
     foreach ($use_cases as $use_case) {
@@ -65,44 +65,44 @@ class MoopapiUnitTestCase extends DrupalUnitTestCase {
         // Formatting.
         case 'lowercase':
           $app = 'exampleapp';
-          $class = 'exampleclass';
+          $decorators = array('testdecorator');
           break;
         case 'uppercase':
           $app = 'EXAMPLEAPP';
-          $class = 'EXAMPLECLASS';
+          $decorators = array('TESTDECORATOR');
           break;
         case 'camelcase':
           $app = 'ExampleApp';
-          $class = 'ExampleClass';
+          $decorators = array('TestDecorator');
           break;
         // Business logic.
         case 'app_null':
           $app = NULL;
-          $class = 'ExampleClass';
+          $decorators = array('TestDecorator');
           break;
-        case 'class_null':
+        case 'decorators_null':
           $app = 'ExampleApp';
-          $class = NULL;
+          $decorators = array();
           break;
         case 'both_null':
           $app = NULL;
-          $class = NULL;
+          $decorators = array();
           break;
       }
       // Test interface function.
       static $classes;
       $classes_old = $classes;
-      $result = moopapi_register($app, $class);
+      $result = moopapi_register($app, $decorators);
       // Check result.
-      if (in_array($use_case, array('lowercase', 'uppercase', 'camelcase', 'class_null'))) {
-        // For formatting and class_null use cases.
+      if (in_array($use_case, array('lowercase', 'uppercase', 'camelcase', 'decorators_null'))) {
+        // For formatting and decorators_null use cases.
         $app_capitalized_first = ucfirst(strtolower($app));
         $this->assertTrue(!empty($result[$app_capitalized_first]), "$use_case: Application is registered");
-        $class = !empty($class) ? $class : $app;
-        $this->assertEqual($result[$app_capitalized_first], ucfirst($class), "$use_case: Application is decorated");
+        $decorator = !empty($decorators) ? reset($decorators) : $app;
+        $this->assertEqual($result[$app_capitalized_first], ucfirst($decorator), "$use_case: Application is decorated");
       }
       else {
-        // Business logic use cases except class_null.
+        // Business logic use cases except decorators_null.
         $this->assertEqual($classes_old, $classes, "$use_case: Register shouldn't change");
       }
       // Clear workspace.
@@ -116,32 +116,34 @@ class MoopapiUnitTestCase extends DrupalUnitTestCase {
       'lowercase',
       'uppercase',
       'camelcase',
-      'class_null',
+      'decorators_null',
       //'app_absent',
       //'class_absent',
       //'method_absent',
     );
     foreach ($use_cases as $use_case) {
       switch ($use_case) {
+        // Formatting.
         case 'lowercase':
           $app = 'exampleapp';
           $method = 'examplemethod';
-          $class = 'exampleclass';
+          $decorators = array('testdecorator');
           break;
         case 'uppercase':
           $app = 'EXAMPLEAPP';
           $method = 'EXAMPLEMETHOD';
-          $class = 'EXAMPLECLASS';
+          $decorators = array('TESTDECORATOR');
           break;
         case 'camelcase':
           $app = 'ExampleApp';
           $method = 'ExampleMethod';
-          $class = 'ExampleClass';
+          $decorators = array('TestDecorator');
           break;
-        case 'class_null':
+        // Business logic.
+        case 'decorators_null':
           $app = 'ExampleApp';
           $method = 'exampleMethod';
-          $class = NULL;
+          $decorators = array();
           break;
         case 'app_absent':
           // @todo Moopapi::absent(): Implement app_absent use case.
@@ -154,15 +156,18 @@ class MoopapiUnitTestCase extends DrupalUnitTestCase {
           break;
       }
       // Test interface function.
-      $result = moopapi_wrap($app, $method, $class);
+      $result = moopapi_wrap($app, $method, $decorators);
       // Check result.
-      if ($use_case === 'class_null') {
-        $class = $app;
+      if ($use_case === 'decorators_null') {
+        $decorator = $app;
+      }
+      else {
+        $decorator = reset($decorators);
       }
       $function_name = "{$app}_{$method}";
       $this->assertTrue(function_exists($function_name), "$use_case: $function_name function was created");
       $function_result = call_user_func($function_name);
-      $this->assertTrue(strcasecmp($function_result, $class) == 0, "$use_case: Calling $app::$method wrapped as $function_name brings $function_result, which is the same as $class");
+      $this->assertTrue(strcasecmp($function_result, $decorator) == 0, "$use_case: Calling $app::$method wrapped as $function_name brings $function_result, which is the same as $decorator");
       // Clear workspace.
       unset($result);
     }
@@ -178,8 +183,8 @@ class ExampleApp {
   }
 }
 
-class ExampleClass {
+class ExampleAppTestDecorator {
   public function exampleMethod() {
-    return 'ExampleClass';
+    return 'TestDecorator';
   }
 }

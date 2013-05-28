@@ -20,11 +20,11 @@ function moopapi_boot() {
 function moopapi_init() {
   // Fetch all registered classes.
   $classes = moopapi_register();
-  foreach ($classes as $app => $class) {
-    $methods = get_class_methods($class);
+  foreach ($classes as $app => $decorators) {
+    $methods = get_class_methods($app);
     // Casting to array is a protection from disabling dependent module.
     foreach ((array)$methods as $method) {
-      moopapi_wrap($app, $method, $class);
+      moopapi_wrap($app, $method, $decorators);
     }
   }
 }
@@ -59,8 +59,9 @@ function moopapi_libraries_info() {
 /**
  * Api function that will create function wrapper to a class method
  *
- * @param stdClass $class
- * @param method $method
+ * @param string $app
+ * @param string $method
+ * @param array $decorators
  */
 function moopapi_wrap($app, $method, array $decorators = array()) {
   if (in_array($method, moopapi_hook_ignore_list())) {
@@ -84,6 +85,15 @@ function moopapi_wrap($app, $method, array $decorators = array()) {
   }
 
   /**
+   * We can't pass an array to defined as text function - so use
+   * this workaround with setting a variable, which is going to
+   * be read during function evaluation.
+   * @see moopapi_object()
+   */
+  $app_lower = strtolower($app);
+  variable_set("{$app_lower}_decorators", serialize($decorators));
+
+  /**
    * To enable passing proper parameters (and parameters by reference)
    * We must use PHP Reflection ( Ref: http://us.php.net/language.oop5.reflection )
    * to auto-discover certain properties, in this case number of arguments a method expects
@@ -104,7 +114,7 @@ function {$app}_{$method}({$args}) {
       \$full_args[\$number] = &\$\$var_name;
     }
   }
-  \$application = moopapi_object('{$app}', {$decorators});
+  \$application = moopapi_object('{$app}');
   return call_user_func_array(array(\$application, '{$method}'), \$full_args);
 }
 END;
@@ -143,11 +153,10 @@ function moopapi_create_args($parameters, $clean = FALSE) {
 /**
  * Central pool of all of existent and loaded oop module objects.
  */
-function moopapi_object($app, array $decorators = array()) {
-  static $objects;
-  // @todo Remove it.
-  //$new_object = ComponentFactory::get($app, Component::TYPE_CONTROLLER, Component::ID_APPLICATION, unserialize(variable_get("{$app_lower}_decorators", serialize(array()))));
-  $new_object = ComponentFactory::get($app, Component::TYPE_CONTROLLER, Component::ID_APPLICATION, $decorators);
+function moopapi_object($app) {
+  static $objects = array();
+  $app_lower = strtolower($app);
+  $new_object = ComponentFactory::get($app, Component::TYPE_CONTROLLER, Component::ID_APPLICATION, unserialize(variable_get("{$app_lower}_decorators", serialize(array()))));
   if (!isset($objects[$app]) || get_class($objects[$app]) != get_class($new_object)) {
     $objects[$app] = $new_object;
   }
@@ -157,17 +166,19 @@ function moopapi_object($app, array $decorators = array()) {
 /**
  * OOP modules must register themselves before they can be initialized
  * Modules can use this API function during boot and init hooks to register themselves so moopapi
- * can integrate them with the framework
+ * can integrate them with the framework.
+ *
+ * @staticvar array $classes
+ * @param string $app
+ * @param array $decorators
+ * @return array
  */
-function moopapi_register($app = NULL, $class = NULL) {
-  static $classes;
-  if (!isset($classes)) {
-    $classes = array();
-  }
+function moopapi_register($app = NULL, array $decorators = array()) {
+  static $classes = array();
   if ($app !== NULL && !isset($classes[$app])) {
     $class = ($class) ? $class : $app;
     // Unify all classnames as follows: Application, Foo, Bar,...
-    $classes[ucfirst(strtolower($app))] = ucfirst($class);
+    $classes[ucfirst(strtolower($app))] = array_filter($decorators, 'ucfirst');;
   }
   return $classes;
 }
