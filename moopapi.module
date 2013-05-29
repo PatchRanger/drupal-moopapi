@@ -98,13 +98,15 @@ function moopapi_wrap($app, $method, array $decorators = array()) {
     return ;  // do not create it again
   }
 
-  /**
-   * To enable passing proper parameters (and parameters by reference)
-   * We must use PHP Reflection ( Ref: http://us.php.net/language.oop5.reflection )
-   * to auto-discover certain properties, in this case number of arguments a method expects
-   */
-  Patchwork\replace($function_name, function()
+  // Use replaceLater as it allows not defined functions.
+  Patchwork\replaceLater($function_name, function()
   {
+    /**
+     * In order to enable passing proper parameters (and parameters by reference)
+     * we must use PHP Reflection ( Ref: http://us.php.net/language.oop5.reflection )
+     * to auto-discover certain properties, in this case number of arguments
+     * a method expects.
+     */
     // To pass additional params that are not declared.
     $full_args = func_get_args();
     $ref_method = new ReflectionMethod($app, $method);
