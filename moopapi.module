@@ -7,11 +7,14 @@ function moopapi_boot() {
   /**
    * This hook is absolutely necessary to force drupal to load this module early on.
    * All contrib oop modules will fail to execute properly if we fail to load this module before them.
-   *
-   * @todo Refactor it.
    */
-  module_invoke('moopapi', 'register', 'drupal', array('D6Adapter'));
-  module_invoke('moopapi', 'register', 'file', array('D6Adapter'));
+  // Register itself.
+  module_invoke('moopapi', 'register', 'moopapi');
+  // Include Patchwork as early as possible to empower redefining.
+  $patchwork_path = DRUPAL_ROOT . '/' . 'sites/all/libraries/patchwork/Patchwork.php';
+  if (file_exists($patchwork_path)) {
+    include_once $patchwork_path;
+  }
 }
 
 /**
@@ -73,6 +76,7 @@ function moopapi_wrap($app, $method, array $decorators = array()) {
   $app_lower = strtolower($app);
   variable_set("{$app_lower}_decorators", serialize($decorators));
 
+  $function_name = "{$app}_{$method}";
   if (in_array($method, moopapi_hook_ignore_list())) {
     /**
      * I am assuming that developer wants this method to be executed
@@ -84,7 +88,8 @@ function moopapi_wrap($app, $method, array $decorators = array()) {
     moopapi_object($app)->$method();
     return ;
   }
-  elseif (function_exists("{$app}_{$method}")) {
+  elseif (function_exists($function_name)
+    && !in_array($function_name, unserialize(variable_get('moopapi_functions_overridden', serialize(array()))))) {
     /**
      * This could mean that developer chose to create function on his own, so we respect his wishes and skip re-implementing it
      * If in this step function does not exist it means that it was not created by the developer or previously by us.
@@ -98,56 +103,22 @@ function moopapi_wrap($app, $method, array $decorators = array()) {
    * We must use PHP Reflection ( Ref: http://us.php.net/language.oop5.reflection )
    * to auto-discover certain properties, in this case number of arguments a method expects
    */
-  $ref_method = new ReflectionMethod($app, $method);
-  $parameters = $ref_method->getParameters();
-  $args = moopapi_create_args($parameters);
-  $function = <<<END
-function {$app}_{$method}({$args}) {
-  // To pass additional params that are not declared.
-  \$full_args = func_get_args();
-  \$ref_method = new ReflectionMethod('{$app}', '{$method}');
-  \$parameters = \$ref_method->getParameters();
-  foreach (\$parameters as \$number => \$parameter) {
-    \$var_name = \$parameter->getName();
-    if (\$parameter->isPassedByReference()) {
-      // Right part is a reference to a variable, which is called \$var_name.
-      \$full_args[\$number] = &\$\$var_name;
+  Patchwork\replace($function_name, function()
+  {
+    // To pass additional params that are not declared.
+    $full_args = func_get_args();
+    $ref_method = new ReflectionMethod($app, $method);
+    $parameters = $ref_method->getParameters();
+    foreach ($parameters as $number => $parameter) {
+      $var_name = $parameter->getName();
+      if ($parameter->isPassedByReference()) {
+        // Right part is a reference to a variable, which is called \$var_name.
+        $full_args[$number] = &${$var_name};
+      }
     }
-  }
-  \$application = moopapi_object('{$app}');
-  return call_user_func_array(array(\$application, '{$method}'), \$full_args);
-}
-END;
-  // This is what makes the magic possible create function in runtime that calls
-  // our objects.
-  eval($function);
-}
-
-/**
- * API to create arguments' string.
- *
- * @param array $parameters
- * @param boolean $clean
- * @return arg_string
- */
-function moopapi_create_args($parameters, $clean = FALSE) {
-  $args = array();
-  foreach ($parameters as $i => $parameter) {
-    $prefix = '';
-    if (!$clean) {
-      $prefix = ($parameter->isPassedByReference()) ? '&' : '';
-    }
-    $name = $parameter->getName();
-    $arg_definition = "{$prefix}\${$name}";
-    if ($parameter->isOptional()) {
-      $default_value = $parameter->getDefaultValue();
-      $default_value = ($default_value) ? $default_value : 'NULL';
-      $arg_definition .= "={$default_value}";
-    }
-    $args[$i] = $arg_definition;
-  }
-  $args = implode(', ', $args);
-  return $args;
+    $application = moopapi_object($app);
+    return call_user_func_array(array($application, $method), $full_args);
+  });
 }
 
 /**
@@ -198,97 +169,4 @@ function moopapi_get_major_version() {
     $moopapi_major_version = (defined('VERSION')) ? current(explode('.', VERSION)) : '6';
   }
   return $moopapi_major_version;
-}
-
-/**
- * Make SimpleTestMailCaptureTestCase passed.
- *
- * @param array $message
- */
-function moopapi_mail_alter(&$message) {
-  if ($message['module'] == 'simpletest') {
-    // Replace testing mail system with ours to override formatting, which is redundant.
-    variable_set('mail_system', array('default-system' => 'MoopapiTestingMailSystem'));
-    if (!empty($message['params']) && is_array($message['params'])) {
-      // Use params as default values.
-      $params = array('id', 'headers', 'subject', 'body');
-      foreach ($params as $param) {
-        if (isset($message['params'][$param])) {
-          $message[$param] = $message['params'][$param];
-        }
-      }
-    }
-  }
-}
-
-class MoopapiTestingMailSystem extends TestingMailSystem {
-
-  // We are overriding this behavior, because format makes Simpletest failed.
-  public function format(array $message) {
-    return $message;
-  }
-}
-
-/**
- * Make SimpleTestFunctionalTest::testInternalBrowser() assertTitle() passed.
- *
- * @param array $page
- */
-function moopapi_page_alter(&$page) {
-  $path = request_path();
-  if ($path == 'node') {
-    $page['#post_render'] = array('moopapi_alter_title');
-  }
-  elseif (preg_match('#admin/config/development/testing/results/(\d{1})#', $path)) {
-    $page['#post_render'] = array('moopapi_alter_dom');
-  }
-}
-
-function moopapi_alter_title($content, $element) {
-  $content = preg_replace('#<title>(.*)</title>#', '<title>' . variable_get('site_name', 'Drupal') . '</title>', $content);
-  return $content;
-}
-
-function moopapi_alter_dom($content, $element) {
-  $dom = new DOMDocument();
-  $dom->loadHTML($content);
-  $simplexml = simplexml_import_dom($dom);
-  $fieldsets = $simplexml->xpath('//fieldset');
-  foreach ($fieldsets as $fieldset) {
-    if (trim(html_entity_decode(strip_tags($fieldset->legend->asXML()))) == 'SimpleTest functionality') {
-      // We've found the fieldset we looked for.
-      break;
-    }
-  }
-  // Modify fieldset as we need.
-  $fieldset_clone = clone $fieldset;
-  $fieldset->div[1] = $fieldset_clone->div->div[1];
-  unset($fieldset->div->div[1]);
-  $fieldset->table = $fieldset_clone->div->table;
-  unset($fieldset->div->table);
-  // Get HTML of modified fieldset.
-  $fieldset_dom_element = dom_import_simplexml($fieldset);
-  $fieldset_dom = new DOMDocument('1.0', 'utf-8');
-  $fieldset_dom_node = $fieldset_dom->importNode($fieldset_dom_element, TRUE);
-  $fieldset_dom->appendChild($fieldset_dom_node);
-  $fieldset_html = $fieldset_dom->saveHTML();
-  // @todo Perhaps it could be done transparently via replaceChild().
-  // Replace old fieldset with edited one.
-  $content = preg_replace('#<fieldset[\s\S]{0,50}id="edit-simpletestfunctionaltest"[\s\S]*SimpleTest functionality[\s\S]*</fieldset>#', $fieldset_html, $content);
-  return $content;
-}
-
-/**
- * Make SimpleTestFunctionalTest::testWebTestRunner() passed.
- *
- * @param string $path
- * @param string $original_path
- * @param type $path_language
- */
-function moopapi_url_inbound_alter(&$path, $original_path, $path_language) {
-  switch ($path) {
-    case 'admin/build/testing':
-      $path = 'admin/config/development/testing';
-      break;
-  }
 }
