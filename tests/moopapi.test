@@ -95,7 +95,7 @@ class MoopapiWebTestCase extends DrupalWebTestCase {
       // Test interface function.
       $result = moopapi_register($app, $decorators);
       $result_string = print_r($result, TRUE);
-      $this->verbose("$use_case: Got following result: $result_string");
+      $this->pass("$use_case: Got following result: $result_string");
       // Check result.
       if (in_array($use_case, array('lowercase', 'uppercase', 'camelcase', 'decorators_null'))) {
         // For formatting and decorators_null use cases.
@@ -167,7 +167,7 @@ class MoopapiWebTestCase extends DrupalWebTestCase {
       static $objects;
       $objects = array();
       // Test interface function.
-      $result = moopapi_wrap($app, $method, $decorators);
+      moopapi_wrap($app, $method, $decorators);
       // Check result.
       if ($use_case === 'decorators_null') {
         $decorator = $app;
@@ -176,9 +176,10 @@ class MoopapiWebTestCase extends DrupalWebTestCase {
         $decorator = reset($decorators);
       }
       $function_name = "{$app}_{$method}";
-      $this->assertTrue(function_exists($function_name), "$use_case: $function_name function was created");
-      $function_result = call_user_func($function_name);
-      $this->assertTrue(strcasecmp($function_result, $decorator) == 0, "$use_case: Calling $app::$method wrapped as $function_name brings $function_result, which is the same as $decorator");
+      if ($this->assertTrue(function_exists($function_name), "$use_case: $function_name function was created")) {
+        $function_result = call_user_func($function_name);
+        $this->assertTrue(strcasecmp($function_result, $decorator) == 0, "$use_case: Calling $app::$method wrapped as $function_name brings $function_result, which is the same as $decorator");
+      }
       // Clear workspace.
       unset($result);
       $objects = array();

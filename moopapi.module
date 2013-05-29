@@ -64,26 +64,6 @@ function moopapi_libraries_info() {
  * @param array $decorators
  */
 function moopapi_wrap($app, $method, array $decorators = array()) {
-  if (in_array($method, moopapi_hook_ignore_list())) {
-    /**
-     * I am assuming that developer wants this method to be executed
-     * Because developer explicitly implemented this hook both in function and in method.
-     *
-     * WARNING: we cannot predict the type of arguments to be passed here. so we pass none.
-     * This limitation is to the developer to figure out how to bypass
-     */
-    moopapi_object($app, $decorators)->$method();
-    return ;
-  }
-  elseif (function_exists($app . '_' . $method)) {
-    /**
-     * This could mean that developer chose to create function on his own, so we respect his wishes and skip re-implementing it
-     * If in this step function does not exist it means that it was not created by the developer or previously by us.
-     * lets create it.
-     */
-    return ;  // do not create it again
-  }
-
   /**
    * We can't pass an array to defined as text function - so use
    * this workaround with setting a variable, which is going to
@@ -92,6 +72,26 @@ function moopapi_wrap($app, $method, array $decorators = array()) {
    */
   $app_lower = strtolower($app);
   variable_set("{$app_lower}_decorators", serialize($decorators));
+
+  if (in_array($method, moopapi_hook_ignore_list())) {
+    /**
+     * I am assuming that developer wants this method to be executed
+     * Because developer explicitly implemented this hook both in function and in method.
+     *
+     * WARNING: we cannot predict the type of arguments to be passed here. so we pass none.
+     * This limitation is to the developer to figure out how to bypass
+     */
+    moopapi_object($app)->$method();
+    return ;
+  }
+  elseif (function_exists("{$app}_{$method}")) {
+    /**
+     * This could mean that developer chose to create function on his own, so we respect his wishes and skip re-implementing it
+     * If in this step function does not exist it means that it was not created by the developer or previously by us.
+     * lets create it.
+     */
+    return ;  // do not create it again
+  }
 
   /**
    * To enable passing proper parameters (and parameters by reference)
@@ -157,6 +157,7 @@ function moopapi_object($app) {
   static $objects = array();
   $app_lower = strtolower($app);
   $new_object = ComponentFactory::get($app, Component::TYPE_CONTROLLER, Component::ID_APPLICATION, unserialize(variable_get("{$app_lower}_decorators", serialize(array()))));
+  // @todo Implement caching per decorator.
   if (!isset($objects[$app]) || get_class($objects[$app]) != get_class($new_object)) {
     $objects[$app] = $new_object;
   }
