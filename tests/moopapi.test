@@ -8,10 +8,10 @@
  * Tests that Patchwork library is available, installed and
  * works properly and tests Moopapi interface.
  */
-class MoopapiUnitTestCase extends DrupalUnitTestCase {
+class MoopapiWebTestCase extends DrupalWebTestCase {
   public static function getInfo() {
     return array(
-      'name' => 'Moopapi unit tests',
+      'name' => 'Moopapi tests',
       'description' => 'Tests that Patchwork library is available, installed and works properly and tests Moopapi interface.',
       'group' => 'Moopapi',
     );
