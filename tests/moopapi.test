@@ -19,11 +19,13 @@ class MoopapiWebTestCase extends DrupalWebTestCase {
 
   public function setUp() {
     parent::setUp(array('moopapi'));
+  }
+
+  public function testMonkeyPatch() {
     $library = libraries_detect('patchwork');
     // Check Patchwork library.
     if ($this->assertTrue($library, 'Patchwork library is detected')) {
-      if (is_array($library) && !empty($library['installed'])) {
-        $this->pass('Patchwork library is installed');
+      if ($this->assertTrue(is_array($library) && !empty($library['installed']), 'Patchwork library is installed')) {
         $library = libraries_load('patchwork');
         $this->assertTrue(!empty($library['loaded']), 'Patchwork library is loaded');
       }
@@ -38,9 +40,6 @@ class MoopapiWebTestCase extends DrupalWebTestCase {
         $this->fail($message);
       }
     }
-  }
-
-  public function testMonkeyPatch() {
     // Only now we include necessary file to make Patchwork
     // interception work.
     module_load_include('inc', 'moopapi', 'tests/monkey_patch');
