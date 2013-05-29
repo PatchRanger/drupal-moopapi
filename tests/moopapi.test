@@ -163,6 +163,9 @@ class MoopapiWebTestCase extends DrupalWebTestCase {
           // @todo Moopapi::absent(): Implement method_absent use case.
           break;
       }
+      // Prepare workspace.
+      static $objects;
+      $objects = array();
       // Test interface function.
       $result = moopapi_wrap($app, $method, $decorators);
       // Check result.
@@ -178,6 +181,7 @@ class MoopapiWebTestCase extends DrupalWebTestCase {
       $this->assertTrue(strcasecmp($function_result, $decorator) == 0, "$use_case: Calling $app::$method wrapped as $function_name brings $function_result, which is the same as $decorator");
       // Clear workspace.
       unset($result);
+      $objects = array();
     }
   }
 }
