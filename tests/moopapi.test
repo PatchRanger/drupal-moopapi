@@ -94,13 +94,15 @@ class MoopapiUnitTestCase extends DrupalUnitTestCase {
       $classes = array();
       // Test interface function.
       $result = moopapi_register($app, $decorators);
+      $result_string = print_r($result, TRUE);
+      $this->verbose("$use_case: Got following result: $result_string");
       // Check result.
       if (in_array($use_case, array('lowercase', 'uppercase', 'camelcase', 'decorators_null'))) {
         // For formatting and decorators_null use cases.
         $app_capitalized_first = ucfirst(strtolower($app));
-        if ($this->assertTrue(!empty($result[$app_capitalized_first]), "$use_case: Application is registered")) {
+        if ($this->assertTrue(isset($result[$app_capitalized_first]), "$use_case: Application is registered")) {
           $decorator_expected = reset($decorators);
-          $decorator_real = reset($result[$app_capitalized_first]);
+          $decorator_real = reset((array)$result[$app_capitalized_first]);
           $this->assertTrue(strcasecmp($decorator_real, $decorator_expected) == 0, "$use_case: Application is decorated (expected decorator $decorator_expected equals real $decorator_real)");
         }
       }
