@@ -89,21 +89,24 @@ class MoopapiUnitTestCase extends DrupalUnitTestCase {
           $decorators = array();
           break;
       }
-      // Test interface function.
+      // Prepare workspace.
       static $classes;
-      $classes_old = $classes;
+      $classes = array();
+      // Test interface function.
       $result = moopapi_register($app, $decorators);
       // Check result.
       if (in_array($use_case, array('lowercase', 'uppercase', 'camelcase', 'decorators_null'))) {
         // For formatting and decorators_null use cases.
         $app_capitalized_first = ucfirst(strtolower($app));
-        $this->assertTrue(!empty($result[$app_capitalized_first]), "$use_case: Application is registered");
-        $decorator = !empty($decorators) ? reset($decorators) : $app;
-        $this->assertEqual($result[$app_capitalized_first], ucfirst($decorator), "$use_case: Application is decorated");
+        if ($this->assertTrue(!empty($result[$app_capitalized_first]), "$use_case: Application is registered")) {
+          $decorator_expected = reset($decorators);
+          $decorator_real = reset($result[$app_capitalized_first]);
+          $this->assertTrue(strcasecmp($decorator_real, $decorator_expected) == 0, "$use_case: Application is decorated (expected decorator $decorator_expected equals real $decorator_real)");
+        }
       }
       else {
         // Business logic use cases except decorators_null.
-        $this->assertEqual($classes_old, $classes, "$use_case: Register shouldn't change");
+        $this->assertTrue(empty($classes), "$use_case: Register should be empty");
       }
       // Clear workspace.
       unset($result);

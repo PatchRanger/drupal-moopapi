@@ -176,9 +176,8 @@ function moopapi_object($app) {
 function moopapi_register($app = NULL, array $decorators = array()) {
   static $classes = array();
   if ($app !== NULL && !isset($classes[$app])) {
-    $class = ($class) ? $class : $app;
     // Unify all classnames as follows: Application, Foo, Bar,...
-    $classes[ucfirst(strtolower($app))] = array_filter($decorators, 'ucfirst');;
+    $classes[ucfirst(strtolower($app))] = array_filter($decorators, 'ucfirst');
   }
   return $classes;
 }
