@@ -98,29 +98,82 @@ function moopapi_wrap($app, $method, array $decorators = array()) {
     return ;  // do not create it again
   }
 
-  // Use replaceLater as it allows not defined functions.
-  Patchwork\replaceLater($function_name, function()
-  {
-    /**
-     * In order to enable passing proper parameters (and parameters by reference)
-     * we must use PHP Reflection ( Ref: http://us.php.net/language.oop5.reflection )
-     * to auto-discover certain properties, in this case number of arguments
-     * a method expects.
-     */
-    // To pass additional params that are not declared.
-    $full_args = func_get_args();
-    $ref_method = new ReflectionMethod($app, $method);
-    $parameters = $ref_method->getParameters();
-    foreach ($parameters as $number => $parameter) {
-      $var_name = $parameter->getName();
-      if ($parameter->isPassedByReference()) {
-        // Right part is a reference to a variable, which is called \$var_name.
-        $full_args[$number] = &${$var_name};
+  /**
+  * In order to enable passing proper parameters (and parameters by reference)
+  * we must use PHP Reflection ( Ref: http://us.php.net/language.oop5.reflection )
+  * to auto-discover certain properties, in this case number of arguments
+  * a method expects.
+  */
+  $ref_method = new ReflectionMethod($app, $method);
+  $parameters = $ref_method->getParameters();
+  // Determine whether to create or replace.
+  if (Patchwork\Utils\callbackTargetDefined($function_name)) {
+    // Use replaceLater as it allows not yet defined functions.
+    Patchwork\replaceLater($function_name, function()
+    {
+      // To pass additional params that are not declared.
+      $full_args = func_get_args();
+      foreach ($parameters as $number => $parameter) {
+	$var_name = $parameter->getName();
+	if ($parameter->isPassedByReference()) {
+	  // Right part is a reference to a variable, which is called \$var_name.
+	  $full_args[$number] = &${$var_name};
+	}
       }
+      $application = moopapi_object($app);
+      return call_user_func_array(array($application, $method), $full_args);
+    });
+  }
+  else {
+    $args = moopapi_create_args($parameters);
+    $function = <<<END
+function {$function_name}({$args}) {
+  // To pass additional params that are not declared.
+  \$full_args = func_get_args();
+  \$ref_method = new ReflectionMethod('{$app}', '{$method}');
+  \$parameters = \$ref_method->getParameters();
+  foreach (\$parameters as \$number => \$parameter) {
+    \$var_name = \$parameter->getName();
+    if (\$parameter->isPassedByReference()) {
+      // Right part is a reference to a variable, which is called \$var_name.
+      \$full_args[\$number] = &\$\$var_name;
     }
-    $application = moopapi_object($app);
-    return call_user_func_array(array($application, $method), $full_args);
-  });
+  }
+  \$application = moopapi_object('{$app}');
+  return call_user_func_array(array(\$application, '{$method}'), \$full_args);
+}
+END;
+    // This is what makes the magic possible create function in runtime that calls
+    // our objects.
+    eval($function);
+  }
+}
+
+/**
+ * API to create arguments' string.
+ *
+ * @param array $parameters
+ * @param boolean $clean
+ * @return arg_string
+ */
+function moopapi_create_args($parameters, $clean = FALSE) {
+  $args = array();
+  foreach ($parameters as $i => $parameter) {
+    $prefix = '';
+    if (!$clean) {
+      $prefix = ($parameter->isPassedByReference()) ? '&' : '';
+    }
+    $name = $parameter->getName();
+    $arg_definition = "{$prefix}\${$name}";
+    if ($parameter->isOptional()) {
+      $default_value = $parameter->getDefaultValue();
+      $default_value = ($default_value) ? $default_value : 'NULL';
+      $arg_definition .= "={$default_value}";
+    }
+    $args[$i] = $arg_definition;
+  }
+  $args = implode(', ', $args);
+  return $args;
 }
 
 /**
