@@ -19,6 +19,8 @@ class MoopapiWebTestCase extends DrupalWebTestCase {
 
   public function setUp() {
     parent::setUp(array('moopapi'));
+    // Turn on Patchwork interception.
+    moopapi_boot();
   }
 
   public function testMonkeyPatch() {
@@ -165,6 +167,7 @@ class MoopapiWebTestCase extends DrupalWebTestCase {
       // Prepare workspace.
       static $objects;
       $objects = array();
+      module_load_include('inc', 'moopapi', 'tests/monkey_patch');
       // Test interface function.
       moopapi_wrap($app, $method, $decorators);
       // Check result.
@@ -183,20 +186,5 @@ class MoopapiWebTestCase extends DrupalWebTestCase {
       unset($result);
       $objects = array();
     }
-  }
-}
-
-/**
- * It is for testing Moopapi::wrap().
- */
-class ExampleApp {
-  public function exampleMethod() {
-    return 'ExampleApp';
-  }
-}
-
-class ExampleAppTestDecorator {
-  public function exampleMethod() {
-    return 'TestDecorator';
   }
 }
