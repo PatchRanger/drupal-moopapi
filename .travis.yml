@@ -9,7 +9,8 @@ mysql:
 
 # This is for make code abstract, facilitating copy-pasting.
 env:
-  GITHUB_REPOSITORY=drupal7-moopapi DRUPAL_VERSION=7.x DRUPAL_MODULE=moopapi
+  - GITHUB_REPOSITORY=drupal-moopapi DRUPAL_VERSION=7.x PROFILE=standard DRUPAL_MODULE=moopapi
+  - GITHUB_REPOSITORY=drupal-moopapi DRUPAL_VERSION=6.x PROFILE=default DRUPAL_MODULE=moopapi
 
 before_script:
  - mysql -e 'create database drupal;'
@@ -18,35 +19,50 @@ before_script:
  - phpenv rehash
  - cd ..
  # Get Patchwork library.
+ # @todo Build using drush make or else to avoid such mandatory stuff.
  - wget --output-document=patchwork.zip https://github.com/antecedent/patchwork/archive/master.zip
  - ls -la
  - unzip patchwork.zip
  - ls -la
  - mv patchwork-master patchwork
  - ls patchwork -la
- # --no-cache is must-have due to http://drupal.org/node/1630220
- - drush dl drupal-$DRUPAL_VERSION --no-cache
+ # Prepare Drupal.
+ - mkdir drupal
+ - cd drupal
+ - cp ../$GITHUB_REPOSITORY/$DRUPAL_VERSION/drupal.make drupal.make
+ - drush make drupal.make .
  # Discover newly downloaded directory.
  - ls -la
- - cd drupal-*
- # make sure we are inside Drupal root.
- - ls -la
  # Install Drupal.
- - drush si standard --db-url=mysql://root:@localhost/drupal --yes
+ - drush si $PROFILE --db-url=mysql://root:@localhost/drupal --yes
+ # Prepare Simpletest.
+ - sh -c "if [ '$DRUPAL_VERSION' = '6.x' ]; then cp sites/all/modules/simpletest/run-tests.sh scripts/run-tests.sh; fi"
  - drush en simpletest --yes
- # Enable Libraries.
- - drush dl libraries --dev --no-cache
- - drush en libraries --yes
+ # Prepare library.
  - mkdir sites/all/libraries
  - cp -R ../patchwork sites/all/libraries/patchwork
- - ls sites/all/libraries/patchwork -la
- - cp -R ../$GITHUB_REPOSITORY sites/all/modules/$DRUPAL_MODULE
+ # Prepare required modules.
+ - cp ../$GITHUB_REPOSITORY/$DRUPAL_VERSION/$DRUPAL_MODULE.make $DRUPAL_MODULE.make
+ - drush make $DRUPAL_MODULE.make . --no-core
+ - drush en libraries --yes
+ # Download major-version-independent "library".
+ - drush make sites/all/modules/$DRUPAL_MODULE/$DRUPAL_MODULE.make . --no-core
+ # For debugging: check which versions we use.
+ # @todo Avoid hardcode.
+ - drush pm-info libraries moopapi_base $DRUPAL_MODULE
  - drush en $DRUPAL_MODULE --yes
  - drush cc all
  - drush runserver --server=builtin 8080 &
  - sleep 4
  #- drush vset simpletest_verbose FALSE --yes
  - drush vset simpletest_verbose TRUE --yes
+ # Create a directory to output results.
+ - mkdir results
 
-script: php scripts/run-tests.sh --php ~/.phpenv/versions/5.4.16/bin/php --url 'http://127.0.0.1:8080' --verbose --file sites/all/modules/$DRUPAL_MODULE/tests/$DRUPAL_MODULE.test
+ # @todo Use variables instead of hardcode.
+script: php scripts/run-tests.sh --php ~/.phpenv/versions/5.4.16/bin/php --url 'http://127.0.0.1:8080' --verbose --file sites/all/modules/moopapi_base/tests/$DRUPAL_MODULE.test
  #drush test-run --xml --file=sites/all/modules/moopapi/core/simpletest.test --uri=http://127.0.0.1:8080
+
+after_script:
+ - cd results
+ - ls -la
