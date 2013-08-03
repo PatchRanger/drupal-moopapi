@@ -58,7 +58,7 @@ before_script:
 
  # @todo Use variables instead of hardcode.
 script: #php scripts/run-tests.sh --php ~/.phpenv/versions/5.4.16/bin/php --url 'http://127.0.0.1:8080' --verbose --file sites/all/modules/$DRUPAL_MODULE/tests/$DRUPAL_MODULE.test
- drush test-run --file=sites/all/modules/$DRUPAL_MODULE/tests/$DRUPAL_MODULE.test --uri=http://127.0.0.1:8080
+ drush test-run Moopapi --uri=http://127.0.0.1:8080
 
 after_script:
  - cd results
