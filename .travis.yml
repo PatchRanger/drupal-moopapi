@@ -63,4 +63,4 @@ script: php scripts/run-tests.sh --php ~/.phpenv/versions/5.4.16/bin/php --url '
 after_script:
  - cd results
  - ls -la
-# Trigger testing of changes at drupal.org..
+# Trigger testing of changes at drupal.org.
