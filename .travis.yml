@@ -28,7 +28,7 @@ before_script:
  # Prepare Drupal.
  - mkdir drupal
  - cd drupal
- - cp ../$GITHUB_REPOSITORY/$DRUPAL_VERSION/$BRANCH/drupal.make drupal.make
+ - cp ../$GITHUB_REPOSITORY/$DRUPAL_VERSION/drupal.make drupal.make
  - drush make drupal.make .
  # Discover newly downloaded directory.
  - ls -la
