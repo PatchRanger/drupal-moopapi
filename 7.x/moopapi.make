@@ -10,10 +10,9 @@ core = 7.x
 api = 2
 
 ; Download via git, because we don't want to wait while drupal.org builds a package.
-libraries[moopapi][type] = module
-libraries[moopapi][download][type] = git
-libraries[moopapi][download][branch] = 7.x-2.x
-libraries[moopapi][destination] = modules
+projects[moopapi][type] = module
+projects[moopapi][download][type] = git
+projects[moopapi][download][branch] = 7.x-2.x
 
 ; Dependencies.
 projects[libraries][overwrite] = TRUE
