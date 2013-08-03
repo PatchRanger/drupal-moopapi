@@ -13,12 +13,3 @@ api = 2
 projects[moopapi][type] = module
 projects[moopapi][download][type] = git
 projects[moopapi][download][branch] = 6.x-2.x
-
-; Dependencies.
-projects[autoload][overwrite] = TRUE
-projects[autoload][version] = 2.x-dev
-projects[libraries][overwrite] = TRUE
-projects[libraries][version] = 1.x-dev
-
-; Patch for Autoload long-standing issue.
-projects[autoload][patch][] = "http://drupal.org/files/issues/1238562-1-autoload_file_scan_directory_fix.patch"
