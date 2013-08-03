@@ -18,14 +18,6 @@ before_script:
  - pyrus install drush/drush-devel
  - phpenv rehash
  - cd ..
- # Get Patchwork library.
- # @todo Build using drush make or else to avoid such mandatory stuff.
- - wget --output-document=patchwork.zip https://github.com/antecedent/patchwork/archive/master.zip
- - ls -la
- - unzip patchwork.zip
- - ls -la
- - mv patchwork-master patchwork
- - ls patchwork -la
  # Prepare Drupal.
  - mkdir drupal
  - cd drupal
@@ -38,14 +30,11 @@ before_script:
  # Prepare Simpletest.
  - sh -c "if [ '$DRUPAL_VERSION' = '6.x' ]; then cp sites/all/modules/simpletest/run-tests.sh scripts/run-tests.sh; fi"
  - drush en simpletest --yes
- # Prepare library.
- - mkdir sites/all/libraries
- - cp -R ../patchwork sites/all/libraries/patchwork
  # Prepare required modules.
  - cp ../$GITHUB_REPOSITORY/$DRUPAL_VERSION/$DRUPAL_MODULE.make $DRUPAL_MODULE.make
  - drush make $DRUPAL_MODULE.make . --no-core
  - drush en libraries --yes
- # Download major-version-independent "library".
+ # Prepare the module..
  - drush make sites/all/modules/$DRUPAL_MODULE/$DRUPAL_MODULE.make . --no-core
  # For debugging: check which versions we use.
  # @todo Avoid hardcode.
