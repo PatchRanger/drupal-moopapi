@@ -7,10 +7,17 @@ mysql:
   username: root
   encoding: utf8
 
-# This is for make code abstract, facilitating copy-pasting.
 env:
-  - GITHUB_REPOSITORY=drupal-moopapi DRUPAL_VERSION=7.x PROFILE=standard DRUPAL_MODULE=moopapi
-  - GITHUB_REPOSITORY=drupal-moopapi DRUPAL_VERSION=6.x PROFILE=default DRUPAL_MODULE=moopapi
+  # 6.x
+  # 6.x-1.x
+  - GITHUB_REPOSITORY=drupal-moopapi DRUPAL_VERSION=6.x PROFILE=default DRUPAL_MODULE=moopapi BRANCH=1.x
+  # 6.x-2.x
+  - GITHUB_REPOSITORY=drupal-moopapi DRUPAL_VERSION=6.x PROFILE=default DRUPAL_MODULE=moopapi BRANCH=2.x
+  # 7.x
+  # 7.x-1.x
+  - GITHUB_REPOSITORY=drupal-moopapi DRUPAL_VERSION=7.x PROFILE=standard DRUPAL_MODULE=moopapi BRANCH=1.x
+  # 7.x-2.x
+  - GITHUB_REPOSITORY=drupal-moopapi DRUPAL_VERSION=7.x PROFILE=standard DRUPAL_MODULE=moopapi BRANCH=2.x
 
 before_script:
  - mysql -e 'create database drupal;'
@@ -21,7 +28,7 @@ before_script:
  # Prepare Drupal.
  - mkdir drupal
  - cd drupal
- - cp ../$GITHUB_REPOSITORY/$DRUPAL_VERSION/drupal.make drupal.make
+ - cp ../$GITHUB_REPOSITORY/$DRUPAL_VERSION/$BRANCH/drupal.make drupal.make
  - drush make drupal.make .
  # Discover newly downloaded directory.
  - ls -la
@@ -31,11 +38,12 @@ before_script:
  - sh -c "if [ '$DRUPAL_VERSION' = '6.x' ]; then cp sites/all/modules/simpletest/run-tests.sh scripts/run-tests.sh; fi"
  - drush en simpletest --yes
  # Prepare required modules.
- - cp ../$GITHUB_REPOSITORY/$DRUPAL_VERSION/$DRUPAL_MODULE.make $DRUPAL_MODULE.make
+ - cp ../$GITHUB_REPOSITORY/$DRUPAL_VERSION/$BRANCH/$DRUPAL_MODULE.make $DRUPAL_MODULE.make
  - drush make $DRUPAL_MODULE.make . --no-core
  - drush en libraries --yes
- # Prepare the module..
- - drush make sites/all/modules/$DRUPAL_MODULE/$DRUPAL_MODULE.make . --no-core
+ # Prepare the module.
+ # No need: it is done recursively by drush make.
+ #- drush make sites/all/modules/$DRUPAL_MODULE/$DRUPAL_MODULE.make . --no-core
  # For debugging: check which versions we use.
  # @todo Avoid hardcode.
  - drush pm-info libraries moopapi_base $DRUPAL_MODULE
